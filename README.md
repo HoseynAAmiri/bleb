@@ -4,6 +4,8 @@
 
 Read and revise a LaTeX manuscript one paragraph at a time in the browser. Bleb, a small jelly mascot, keeps you company while you work.
 
+**[Try it in your browser](https://hoseynaamiri.github.io/bleb/)** on a mock paper. The demo runs entirely in the page: your edits and reviewed marks stay in your browser's local storage, and there is no PDF build.
+
 The tool shows each body paragraph typeset, lets you edit it in place, and writes the change straight back to the `.tex` file. It starts at the abstract or the first section heading, and skips figures, tables, equations, headings and comments.
 
 ## Run

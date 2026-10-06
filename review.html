@@ -5,7 +5,7 @@
 <!-- KaTeX renders math in the paragraph and in chat replies; without network both just show raw $...$. -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<link rel="stylesheet" href="/bleb/bleb.css">
+<link rel="stylesheet" href="bleb/bleb.css">
 <style>
   :root { --bg:#ebe5d6; --fg:#35322b; --dim:#6a6457; --line:#d6cdba; --card:#f3eee1; --accent:#2c6a59; --ins:#1d5fa8; --del:#b3372b; }
   /* Dark: follows the system unless the toggle has set data-theme. */
@@ -172,7 +172,9 @@
 </aside>
 </div>
 <script type="module">
-import { createBleb } from '/bleb/bleb.js';
+import { createBleb } from './bleb/bleb.js';
+// Without review.py behind the page (GitHub Pages), demo.js answers the same requests in the browser.
+if (!(await fetch('chunks').then(r => r.ok && r.headers.get('Content-Type')?.includes('json'), () => false))) await import('./demo.js');
 const bleb = createBleb({ storageKey: 'reviewJelly', getReadingTarget: () => {
   const el=document.getElementById('preview');
   return {text:el.innerText, rect:el.getBoundingClientRect()};
@@ -347,7 +349,7 @@ function placeCaret(node, off) {
 async function save() {
   const text = draft, was = chunks[i].reviewed;
   if (text === chunks[i].text) return true;
-  const r = await fetch('/save', { method: 'POST', body: JSON.stringify({ i, old: chunks[i].text, new: text }) });
+  const r = await fetch('save', { method: 'POST', body: JSON.stringify({ i, old: chunks[i].text, new: text }) });
   chunks = await r.json();
   if (!r.ok) {
     $('status').textContent = 'File changed on disk. Reloaded; your edit was not saved.';
@@ -363,7 +365,7 @@ async function go(to) { if (await save()) { i = to; show(); } }
 
 // Reviewed marks are stored by the server next to the .tex file, keyed to the paragraph's exact text.
 async function mark(on) {
-  const r = await fetch('/mark', { method: 'POST', body: JSON.stringify({ text: chunks[i].text, on }) });
+  const r = await fetch('mark', { method: 'POST', body: JSON.stringify({ text: chunks[i].text, on }) });
   chunks = await r.json();
 }
 async function reviewedNext() { if (await save()) { await mark(true); i++; show(); } }
@@ -421,8 +423,8 @@ async function saveAndBuild() {
   const saved = 'Saved ' + new Date().toLocaleTimeString();
   $('status').textContent = saved + ' · building PDF…';
   try {
-    const r = await (await fetch('/build', { method: 'POST', body: JSON.stringify({ i, offset: caret }) })).json();
-    $('status').textContent = saved + (!r.ok ? ' · build failed: ' + r.log : r.pointed ? ' · PDF updated' : ' · PDF updated (viewer not reached)');
+    const r = await (await fetch('build', { method: 'POST', body: JSON.stringify({ i, offset: caret }) })).json();
+    $('status').textContent = saved + (r.note ? ' · ' + r.note : !r.ok ? ' · build failed: ' + r.log : r.pointed ? ' · PDF updated' : ' · PDF updated (viewer not reached)');
   } catch (e) { $('status').textContent = saved + ' · build failed: ' + e.message; }
   building = false; $('save').disabled = false;
 }
@@ -589,7 +591,7 @@ async function ask(q) {
   abort = new AbortController(); $('send').textContent = 'Stop';
   let reply = '';
   try {
-    const r = await fetch('/chat', { method: 'POST', body: JSON.stringify({ i, messages: history, ...cfg }), signal: abort.signal });
+    const r = await fetch('chat', { method: 'POST', body: JSON.stringify({ i, messages: history, ...cfg }), signal: abort.signal });
     if (!r.ok) throw new Error((await r.json()).error || r.statusText);
     $('ctx').textContent = r.headers.get('X-Context');
     const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
@@ -624,7 +626,7 @@ $('quick').onclick = e => { if (e.target.dataset.q && !abort) ask(e.target.datas
 
 // KaTeX loads after this script; typeset the paragraph once it is there.
 addEventListener('load', () => { if (chunks.length && window.katex) render(); });
-fetch('/chunks').then(r => r.json()).then(c => {
+fetch('chunks').then(r => r.json()).then(c => {
   chunks = c;
   try { i = +localStorage.getItem('reviewIndex') || 0; } catch {}
   show();

@@ -1,0 +1,82 @@
+% A mock paper for the Bleb online demo. Nothing here is real research:
+% the "measurements" are the constants in bleb/content.js and bleb/life.js.
+\documentclass{article}
+\usepackage{amsmath,graphicx}
+\title{Temper, fatigue and recovery in a soft desktop companion}
+\author{A. Jelly \and B. Wobble}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Soft companions that live on a page are poked, dragged and occasionally thrown by the people they keep company. We study one such companion, Bleb, and ask how its temper, energy and health respond to this handling. It was found that temper rises by one step per poke and only begins to fall after $10$~s of quiet, that energy is spent on sport and recovered by napping, and that a throw faster than $650$~px/s causes an injury which takes between one and two minutes to heal. This is a mock paper: it exists so that you can try the review tool, and every sentence in it is yours to improve.
+\end{abstract}
+
+\section{Introduction}
+
+Writing a manuscript is slow, and revising one is slower. Most authors revise by reading the whole document from the top, which means the introduction is polished many times and the discussion is polished almost never \cite{topheavy}. Reviewing one paragraph at a time, with nothing else on screen, is a simple way to give every paragraph the same attention.
+
+A paragraph-by-paragraph review is, however, a long and lonely task, and it is in order to address this very important issue that a small jelly companion called Bleb was introduced into the margin of the page. Bleb does not check grammar and it does not judge the science. It keeps the author company, celebrates progress, and \emph{reacts} to how it is treated.
+
+In this paper we describe that reaction. Section~\ref{sec:methods} defines the three quantities Bleb keeps track of, Section~\ref{sec:results} reports how they change under poking, play and throwing, and Section~\ref{sec:discussion} considers what this means for an author with a deadline.
+
+\section{Methods}
+\label{sec:methods}
+
+\subsection{State variables}
+
+Bleb has three internal quantities. Temper $T$ counts recent pokes. Energy $E$ and health $H$ both run from $0$ to $100$. A fourth quantity, curiosity, decides whether Bleb explores the page or stays where it is, and is not analysed here.
+
+Energy recovers at a constant rate while Bleb is left alone, and each activity $a$ has a fixed cost $c_a$ which is subtracted when the activity starts, so that after an activity the energy is
+\begin{equation}
+E' = \min\bigl(100,\ \max(0,\ E - c_a)\bigr),
+\label{eq:energy}
+\end{equation}
+where $c_a$ is negative for restful activities. Soccer and basketball are the most expensive at $c_a = 16$, and a nap is the most restful at $c_a = -20$.
+
+\subsection{Handling protocol}
+
+Pokes were delivered by clicking on Bleb. Throws were delivered by dragging and releasing, and the release speed $v$ was taken from the last $100$~ms of pointer motion. All experiments were performed at the middle depth, where Bleb is drawn at its natural size; at the near and far depths it is scaled by $1.25$ and $0.55$ respectively.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\linewidth]{bleb.pdf}
+\caption{Bleb at rest.}
+\label{fig:bleb}
+\end{figure}
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Temper}
+
+Each poke raised $T$ by one. At $T \geq 3$ Bleb looked nervous and at $T \geq 6$ it was angry and stopped dodging the pointer. Cooling did not start until $10$~s had passed since the last poke, after which $T$ fell by one step roughly every $24$ to $33$~s. A new poke during cooling restarted the quiet period, which is consistent with earlier reports that jellies hold grudges \cite{grudge}.
+
+\subsection{Energy and choice of activity}
+
+When $E$ was above $30$, Bleb chose its next activity from a set of short routines, for example soccer followed by a stretch, sunbathing and a nap. When $E$ fell below $30$ the routines were abandoned and only quiet activities were chosen, such as fishing, reading or watching television. Equation~\ref{eq:energy} predicts that two games of soccer in a row are enough to bring a rested Bleb close to this threshold, and this is what was observed.
+
+\subsection{Throwing}
+
+Releases slower than $160$~px/s left Bleb where it was dropped. Faster releases sent it rolling across the page with friction and bounces at the edges. Above $v = 650$~px/s health dropped at once to
+\begin{equation}
+H_0 = \max\Bigl(20,\ 65 - \frac{v - 650}{28}\Bigr),
+\end{equation}
+and then returned linearly to $100$ over a recovery time between $60$ and $120$~s that grew with $v$. During recovery Bleb wore a bandage and refused every activity that was not quiet.
+
+\section{Discussion}
+\label{sec:discussion}
+
+The results that have been presented in the previous section clearly demonstrate the fact that Bleb is a companion which is robust with respect to gentle handling but which is at the same time sensitive with respect to rough handling. A gentle drag teaches it a favorite spot. A hard throw costs it up to two minutes of play.
+
+For the author, the practical consequence is small but real. A companion that is resting gives no encouragement, so the fastest way through a long manuscript is to leave Bleb alone and keep marking paragraphs as reviewed. We note that this is also the fastest way through a long manuscript without a companion \cite{obvious}.
+
+\section{Conclusion}
+
+Bleb's temper, energy and health follow simple rules with a handful of constants. The rules are enough to make it seem to have moods, and the moods are enough to make a long review feel shorter. Whether this improves the manuscript is left for future work.
+
+\begin{acknowledgments}
+We thank Bleb for its patience during the throwing experiments.
+\end{acknowledgments}
+
+\bibliography{refs}
+\end{document}
