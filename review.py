@@ -24,6 +24,8 @@ from urllib.request import Request, urlopen
 
 HERE = Path(__file__).parent
 TEX = Path(sys.argv[1] if len(sys.argv) > 1 else "manuscript.tex").resolve()
+if not TEX.is_file():
+    sys.exit(f"No such file: {TEX}\nUsage: python3 review.py [file.tex]")
 PAGE = HERE / "review.html"
 EDITOR = "cursor"  # process name of the editor running LaTeX Workshop
 PORT = 8765
@@ -101,10 +103,11 @@ def parse(lines):
             elif m[1] != "document":
                 skip_env = m[1]
             continue
-        if not started:
+        if not started and not HEADING.match(line):  # body starts at the abstract or the first heading
             continue
         if m := HEADING.match(line):
             close(i)
+            started = True
             # "Section › Subsection": keep the parents, replace this level and below.
             depth = len(m[1]) // 3
             title = re.sub(r"\\label\{[^}]*\}", "", m[2]).strip()
@@ -321,7 +324,9 @@ class Handler(BaseHTTPRequestHandler):
         before = "\n".join(lines[a:b])[: req.get("offset", 0)]
         row, col = a + before.count("\n"), len(before) - before.rfind("\n") - 1
         try:
-            r = subprocess.run(["./build.sh"], cwd=TEX.parent, capture_output=True, text=True)
+            # A build.sh next to the .tex file wins; otherwise fall back to latexmk.
+            cmd = ["./build.sh"] if (TEX.parent / "build.sh").exists() else ["latexmk", "-pdf", "-synctex=1", "-interaction=nonstopmode", TEX.name]
+            r = subprocess.run(cmd, cwd=TEX.parent, capture_output=True, text=True)
             pointed = r.returncode == 0 and point_viewer(row + 1, lines[row][:col], lines[row][col:])
         except OSError as e:
             return self.send({"ok": False, "log": str(e)})
