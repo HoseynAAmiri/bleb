@@ -4,7 +4,10 @@ A small browser companion, currently embedded in the manuscript review tool.
 No framework, build step, service, or remote assets are required by Bleb itself.
 This is a local prototype; it has not been published as a package.
 
-Open `/bleb/demo.html` on the review server to try every activity and depth.
+See Bleb at work in the [online review demo](https://hoseynaamiri.github.io/bleb/), or try every activity
+and depth in the [online playground](https://hoseynaamiri.github.io/bleb/bleb/demo.html).
+
+Locally, open `/bleb/demo.html` on the review server.
 Alternatively, serve this directory with any static HTTP server.
 
 ## Files
