@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bleb playground</title><link rel="stylesheet" href="./bleb.css">
+<style>
+:root{--bg:#ebe5d6;--fg:#35322b;--dim:#6a6457;--line:#c8beaa;--card:#fff8e9}
+/* Dark: follows the system unless the toggle has set data-theme (shared with the review page). */
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#25272c;--fg:#c8c4b9;--dim:#989a9e;--line:#3b3e45;--card:#2d3036}}
+:root[data-theme=dark]{--bg:#25272c;--fg:#c8c4b9;--dim:#989a9e;--line:#3b3e45;--card:#2d3036}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui}main{max-width:850px;margin:40px auto;padding:24px}h1{display:flex;justify-content:space-between;align-items:center;font-size:32px;margin-bottom:4px}p{max-width:640px}button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--card);border-radius:18px;padding:7px 15px;margin:4px;cursor:pointer}button:hover{background:color-mix(in srgb,var(--card),var(--fg) 10%)}#stage{display:flex;align-items:flex-end;justify-content:center;height:310px;padding:10px;border:1px dashed var(--line);border-radius:24px;margin:24px 0;background:radial-gradient(ellipse,var(--card),transparent);font-size:13px;color:var(--dim)}#state{font-size:14px;color:var(--dim)}fieldset{border:0;padding:0;margin:16px 0}legend{font-weight:600}
+#theme{padding:6px;border:0;background:none;color:var(--dim)}#theme::before{content:'';display:block;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+</style>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('reviewTheme')||''}catch{}</script>
+<main><h1>Bleb playground<button id="theme" title="Switch light / dark"></button></h1><p id="reading-text">Try an activity or a depth. Bleb also wanders between depths and plays on its own. Drag gently to pick a favorite spot, or fling it to see it tumble. A hurt Bleb rests until it recovers. Double-click to reset.</p><div id="stage">Bleb's home spot. It roams the whole page and comes back here.</div><div id="state"></div>
+<fieldset id="depths"><legend>Depth</legend></fieldset><fieldset id="activities"><legend>Activities</legend></fieldset><button id="progress">Celebrate progress</button><button id="finale">Grand finale</button><button id="wander">Find a favorite spot</button><button id="poke">Poke</button><button id="leave">Disappear here</button><p id="feedback" role="status"></p></main>
+<script type="module">
+import {createBleb} from './bleb.js';
+const stage=document.getElementById('stage'), feedback=document.getElementById('feedback');
+const bleb=createBleb({storageKey:'bleb.playground',getReadingTarget:()=>{const el=document.getElementById('reading-text');return {text:el.innerText,rect:el.getBoundingClientRect()}},getHome:()=>{const r=stage.getBoundingClientRect();return {x:r.left+r.width/2-38,y:r.top+120}}});
+window.bleb=bleb; // Playground console only; the review host keeps its instance private.
+for(const name of ['near','middle','far']) add('depths',name,()=>bleb.setLevel(name));
+for(const name of ['newton','blackHole','portal','retro','digitized','pacman','follow','attention','hide','ghost','eating','summer','rainy','snowy','autumn','read','fishing','soccer','baseball','basketball','tennis','swimming','sunbathing','newspaper','phone','dancing','detective','cooking','tv','popcorn','biking','stargazing','kite','hum','lookAround','roll','flip','twirl','stroll','bubble','hop','think','nap','peek','backOff','inAndOut','faraway'].sort((a,b)=>a.localeCompare(b))) add('activities',name,()=>name==='attention'?bleb.seekAttention():bleb.play(name));
+function add(parent,name,fn){const b=document.createElement('button');b.textContent=name.replace(/([A-Z])/g,' $1').toLowerCase();b.onclick=()=>{feedback.textContent=fn()===false?'Bleb is busy for a moment. Try again shortly.':''};document.getElementById(parent).append(b)}
+document.getElementById('theme').onclick=()=>{const root=document.documentElement,dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('reviewTheme',root.dataset.theme)}catch{}};
+let done=0;bleb.progress(0,12);document.getElementById('progress').onclick=()=>bleb.progress(done=Math.min(done+1,12),12);
+document.getElementById('finale').onclick=()=>bleb.celebrateCompletion();
+document.getElementById('wander').onclick=()=>bleb.wander();
+document.getElementById('poke').onclick=()=>bleb.annoy();document.getElementById('leave').onclick=()=>bleb.disappear();
+setInterval(()=>{const s=bleb.state;document.getElementById('state').textContent=`${s.level} depth · health ${Math.round(s.health)} · energy ${Math.round(s.energy)} · ${s.mood} · ${s.gone?'away':s.activity||'minding its own business'}`},250);
+</script></html>
